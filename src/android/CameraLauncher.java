@@ -982,7 +982,9 @@ private String ouputModifiedBitmap(Bitmap bitmap, Uri uri) throws IOException {
         }
 
         // Clean up initial camera-written image file.
-        (new File(FileHelper.stripFileProtocol(oldImage.toString()))).delete();
+        if (oldImage != null) {
+          (new File(FileHelper.stripFileProtocol(oldImage.toString()))).delete();
+        }
 
         checkForDuplicateImage(imageType);
         // Scan for the gallery to update pic refs in gallery
