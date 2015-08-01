@@ -27,19 +27,19 @@
 - (NSData*) spliceExifBlockIntoJpeg: (NSData*) jpegdata
                       withExifBlock: (NSString*) exifstr;
 - (NSString*) createExifAPP1 : (NSDictionary*) datadict;
-- (NSString*) formattedHexStringFromDecimalNumber: (NSNumber*) numb 
+- (NSString*) formattedHexStringFromDecimalNumber: (NSNumber*) numb
                                        withPlaces: (NSNumber*) width;
-- (NSString*) formatNumberWithLeadingZeroes: (NSNumber*) numb 
+- (NSString*) formatNumberWithLeadingZeroes: (NSNumber*) numb
                                  withPlaces: (NSNumber*) places;
 - (NSString*) decimalToUnsignedRational: (NSNumber*) numb
                     withResultNumerator: (NSNumber**) numerator
                   withResultDenominator: (NSNumber**) denominator;
 - (void) continuedFraction: (double) val
-          withFractionList: (NSMutableArray*) fractionlist 
+          withFractionList: (NSMutableArray*) fractionlist
                withHorizon: (int) horizon;
 //- (void) expandContinuedFraction: (NSArray*) fractionlist;
-- (void) splitDouble: (double) val 
-         withIntComponent: (int*) rightside 
+- (void) splitDouble: (double) val
+         withIntComponent: (int*) rightside
          withFloatRemainder: (double*) leftside;
 - (NSString*) formatRationalWithNumerator: (NSNumber*) numerator
                           withDenominator: (NSNumber*) denominator
