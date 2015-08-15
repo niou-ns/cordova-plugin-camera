@@ -26,6 +26,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.net.URI;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
@@ -40,7 +41,6 @@ import android.app.Activity;
 import android.content.ActivityNotFoundException;
 import android.content.ContentValues;
 import android.content.Intent;
-import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.Bitmap.CompressFormat;
@@ -49,10 +49,12 @@ import android.graphics.Matrix;
 import android.media.MediaScannerConnection;
 import android.media.MediaScannerConnection.MediaScannerConnectionClient;
 import android.net.Uri;
+import android.os.Bundle;
 import android.os.Environment;
 import android.provider.MediaStore;
 import android.util.Base64;
 import android.util.Log;
+import android.content.pm.PackageManager;
 /**
  * This class launches the camera view, allows the user to take a picture, closes the camera view,
  * and returns the captured image.  When the camera view is closed, the screen displayed before
@@ -142,7 +144,7 @@ public class CameraLauncher extends CordovaPlugin implements MediaScannerConnect
                 this.targetHeight = -1;
             }
 
-             try {
+            try {
                 if (srcType == CAMERA) {
                     this.takePicture(destType, encodingType);
                 }
@@ -200,8 +202,8 @@ public class CameraLauncher extends CordovaPlugin implements MediaScannerConnect
      * or to display URI in an img tag
      *      img.src=result;
      *
-     * @param quality           Compression quality hint (0-100: 0=low quality & high compression, 100=compress of max quality)
      * @param returnType        Set the type of image to return.
+     * @param encodingType
      */
     public void takePicture(int returnType, int encodingType) {
         // Save the number of images currently on disk for later
@@ -255,7 +257,6 @@ public class CameraLauncher extends CordovaPlugin implements MediaScannerConnect
     /**
      * Get image from photo library.
      *
-     * @param quality           Compression quality hint (0-100: 0=low quality & high compression, 100=compress of max quality)
      * @param srcType           The album to get image from.
      * @param returnType        Set the type of image to return.
      * @param encodingType
@@ -270,7 +271,7 @@ public class CameraLauncher extends CordovaPlugin implements MediaScannerConnect
             intent.setType("image/*");
             if (this.allowEdit) {
                 intent.setAction(Intent.ACTION_PICK);
-//                intent.putExtra("crop", "true");
+                intent.putExtra("crop", "true");
                 if (targetWidth > 0) {
                     intent.putExtra("outputX", targetWidth);
                 }
@@ -281,25 +282,25 @@ public class CameraLauncher extends CordovaPlugin implements MediaScannerConnect
                     intent.putExtra("aspectX", 1);
                     intent.putExtra("aspectY", 1);
                 }
-//                File photo = createCaptureFile(encodingType);
-//                croppedUri = Uri.fromFile(photo);
+                File photo = createCaptureFile(encodingType);
+                croppedUri = Uri.fromFile(photo);
                 intent.putExtra(android.provider.MediaStore.EXTRA_OUTPUT, croppedUri);
             } else {
                 intent.setAction(Intent.ACTION_GET_CONTENT);
                 intent.addCategory(Intent.CATEGORY_OPENABLE);
             }
         } else if (this.mediaType == VIDEO) {
-                intent.setType("video/*");
-                title = GET_VIDEO;
-          intent.setAction(Intent.ACTION_GET_CONTENT);
-          intent.addCategory(Intent.CATEGORY_OPENABLE);
+            intent.setType("video/*");
+            title = GET_VIDEO;
+            intent.setAction(Intent.ACTION_GET_CONTENT);
+            intent.addCategory(Intent.CATEGORY_OPENABLE);
         } else if (this.mediaType == ALLMEDIA) {
-                // I wanted to make the type 'image/*, video/*' but this does not work on all versions
-                // of android so I had to go with the wildcard search.
-                intent.setType("*/*");
-                title = GET_All;
-          intent.setAction(Intent.ACTION_GET_CONTENT);
-          intent.addCategory(Intent.CATEGORY_OPENABLE);
+            // I wanted to make the type 'image/*, video/*' but this does not work on all versions
+            // of android so I had to go with the wildcard search.
+            intent.setType("*/*");
+            title = GET_All;
+            intent.setAction(Intent.ACTION_GET_CONTENT);
+            intent.addCategory(Intent.CATEGORY_OPENABLE);
         }
         if (this.cordova != null) {
             this.cordova.startActivityForResult((CordovaPlugin) this, Intent.createChooser(intent,
@@ -307,52 +308,52 @@ public class CameraLauncher extends CordovaPlugin implements MediaScannerConnect
         }
     }
 
-  /**
-   * Brings up the UI to perform crop on passed image URI
-   *
-   * @param picUri
-   */
-  private void performCrop(Uri picUri, int destType, Intent cameraIntent) {
-    try {
-      Intent cropIntent = new Intent("com.android.camera.action.CROP");
-      // indicate image type and Uri
-      cropIntent.setDataAndType(picUri, "image/*");
-      // set crop properties
-      cropIntent.putExtra("crop", "true");
+    /**
+     * Brings up the UI to perform crop on passed image URI
+     *
+     * @param picUri
+     */
+    private void performCrop(Uri picUri, int destType, Intent cameraIntent) {
+        try {
+            Intent cropIntent = new Intent("com.android.camera.action.CROP");
+            // indicate image type and Uri
+            cropIntent.setDataAndType(picUri, "image/*");
+            // set crop properties
+            cropIntent.putExtra("crop", "true");
 
-      // indicate output X and Y
-      if (targetWidth > 0) {
-          cropIntent.putExtra("outputX", targetWidth);
-      }
-      if (targetHeight > 0) {
-          cropIntent.putExtra("outputY", targetHeight);
-      }
-      if (targetHeight > 0 && targetWidth > 0 && targetWidth == targetHeight) {
-          cropIntent.putExtra("aspectX", 1);
-          cropIntent.putExtra("aspectY", 1);
-      }
-      // create new file handle to get full resolution crop
-      croppedUri = Uri.fromFile(new File(getTempDirectoryPath(), System.currentTimeMillis() + ".jpg"));
-      cropIntent.putExtra("output", croppedUri);
+            // indicate output X and Y
+            if (targetWidth > 0) {
+                cropIntent.putExtra("outputX", targetWidth);
+            }
+            if (targetHeight > 0) {
+                cropIntent.putExtra("outputY", targetHeight);
+            }
+            if (targetHeight > 0 && targetWidth > 0 && targetWidth == targetHeight) {
+                cropIntent.putExtra("aspectX", 1);
+                cropIntent.putExtra("aspectY", 1);
+            }
+            // create new file handle to get full resolution crop
+            croppedUri = Uri.fromFile(new File(getTempDirectoryPath(), System.currentTimeMillis() + ".jpg"));
+            cropIntent.putExtra("output", croppedUri);
 
-      // start the activity - we handle returning in onActivityResult
+            // start the activity - we handle returning in onActivityResult
 
-      if (this.cordova != null) {
-        this.cordova.startActivityForResult((CordovaPlugin) this,
-            cropIntent, CROP_CAMERA + destType);
-      }
-    } catch (ActivityNotFoundException anfe) {
-      Log.e(LOG_TAG, "Crop operation not supported on this device");
-      try {
-          processResultFromCamera(destType, cameraIntent);
-      }
-      catch (IOException e)
-      {
-          e.printStackTrace();
-          Log.e(LOG_TAG, "Unable to write to file");
-      }
+            if (this.cordova != null) {
+                this.cordova.startActivityForResult((CordovaPlugin) this,
+                        cropIntent, CROP_CAMERA + destType);
+            }
+        } catch (ActivityNotFoundException anfe) {
+            Log.e(LOG_TAG, "Crop operation not supported on this device");
+            try {
+                processResultFromCamera(destType, cameraIntent);
+            }
+            catch (IOException e)
+            {
+                e.printStackTrace();
+                Log.e(LOG_TAG, "Unable to write to file");
+            }
+        }
     }
-  }
 
     /**
      * Applies all needed transformation to the image received from the camera.
@@ -477,25 +478,25 @@ public class CameraLauncher extends CordovaPlugin implements MediaScannerConnect
         bitmap = null;
     }
 
-private String getPicutresPath()
-{
-    String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
-    String imageFileName = "IMG_" + timeStamp + ".jpg";
-    File storageDir = Environment.getExternalStoragePublicDirectory(
-            Environment.DIRECTORY_PICTURES);
-    String galleryPath = storageDir.getAbsolutePath() + "/" + imageFileName;
-    return galleryPath;
-}
+    private String getPicutresPath()
+    {
+        String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
+        String imageFileName = "IMG_" + timeStamp + ".jpg";
+        File storageDir = Environment.getExternalStoragePublicDirectory(
+                Environment.DIRECTORY_PICTURES);
+        String galleryPath = storageDir.getAbsolutePath() + "/" + imageFileName;
+        return galleryPath;
+    }
 
-private void refreshGallery(Uri contentUri)
-{
-    Intent mediaScanIntent = new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE);
-    mediaScanIntent.setData(contentUri);
-    this.cordova.getActivity().sendBroadcast(mediaScanIntent);
-}
+    private void refreshGallery(Uri contentUri)
+    {
+        Intent mediaScanIntent = new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE);
+        mediaScanIntent.setData(contentUri);
+        this.cordova.getActivity().sendBroadcast(mediaScanIntent);
+    }
 
 
-private String ouputModifiedBitmap(Bitmap bitmap, Uri uri) throws IOException {
+    private String ouputModifiedBitmap(Bitmap bitmap, Uri uri) throws IOException {
         // Create an ExifHelper to save the exif data that is lost during compression
         String modifiedPath = getTempDirectoryPath() + "/modified.jpg";
 
@@ -522,7 +523,7 @@ private String ouputModifiedBitmap(Bitmap bitmap, Uri uri) throws IOException {
         return modifiedPath;
     }
 
-/**
+    /**
      * Applies all needed transformation to the image received from the gallery.
      *
      * @param destType          In which form should we return the image
@@ -690,9 +691,7 @@ private String ouputModifiedBitmap(Bitmap bitmap, Uri uri) throws IOException {
         // If retrieving photo from library
         else if ((srcType == PHOTOLIBRARY) || (srcType == SAVEDPHOTOALBUM)) {
             if (resultCode == Activity.RESULT_OK && intent != null) {
-//                this.processResultFromGallery(destType, intent);
-            	Log.i(LOG_TAG,"CROP>>>>>>PHOTOLIBRARY");
-            	performCrop(intent.getData(), destType, intent);
+                this.processResultFromGallery(destType, intent);
             }
             else if (resultCode == Activity.RESULT_CANCELED) {
                 this.failPicture("Selection cancelled.");
@@ -817,7 +816,7 @@ private String ouputModifiedBitmap(Bitmap bitmap, Uri uri) throws IOException {
     /**
      * Return a scaled bitmap based on the target width and height
      *
-     * @param imagePath
+     * @param imageUrl
      * @return
      * @throws IOException
      */
@@ -956,7 +955,7 @@ private String ouputModifiedBitmap(Bitmap bitmap, Uri uri) throws IOException {
         } else {
             return srcHeight / dstHeight;
         }
-      }
+    }
 
     /**
      * Creates a cursor that can be used to determine how many images we have.
@@ -977,14 +976,39 @@ private String ouputModifiedBitmap(Bitmap bitmap, Uri uri) throws IOException {
      * @param newImage
      */
     private void cleanup(int imageType, Uri oldImage, Uri newImage, Bitmap bitmap) {
+        Uri contentStore = whichContentStore();
+        Cursor cursor = queryImgDB(contentStore);
+        int currentNumOfImages = cursor.getCount();
+        int diff = currentNumOfImages - numPics;
+        int id;
+
         if (bitmap != null) {
             bitmap.recycle();
         }
 
-        // Clean up initial camera-written image file.
-        if (oldImage != null) {
-          (new File(FileHelper.stripFileProtocol(oldImage.toString()))).delete();
+        // Check for camera-written image files that are not the chosen image
+        // Gets rid of inital camera-written image file as well as any retakes
+        // Addresses issue CD-9490
+        if (currentNumOfImages > 0 && diff > 0) {
+            cursor.moveToLast();
+            id = Integer.valueOf(cursor.getString(cursor.getColumnIndex(MediaStore.Images.Media._ID)));
+
+            if (imageType == FILE_URI) {
+                id--;
+                for (int i = diff; i > 0; i--) {
+                    Uri uri = Uri.parse(contentStore + "/" + id);
+                    this.cordova.getActivity().getContentResolver().delete(uri, null, null);
+                    id--;
+                }
+            } else {
+                for (int i = diff; i > 0; i--) {
+                    Uri uri = Uri.parse(contentStore + "/" + id);
+                    this.cordova.getActivity().getContentResolver().delete(uri, null, null);
+                    id--;
+                }
+            }
         }
+        cursor.close();
 
         checkForDuplicateImage(imageType);
         // Scan for the gallery to update pic refs in gallery
