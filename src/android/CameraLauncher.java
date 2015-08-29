@@ -1,21 +1,21 @@
 /*
-       Licensed to the Apache Software Foundation (ASF) under one
-       or more contributor license agreements.  See the NOTICE file
-       distributed with this work for additional information
-       regarding copyright ownership.  The ASF licenses this file
-       to you under the Apache License, Version 2.0 (the
-       "License"); you may not use this file except in compliance
-       with the License.  You may obtain a copy of the License at
+ Licensed to the Apache Software Foundation (ASF) under one
+ or more contributor license agreements.  See the NOTICE file
+ distributed with this work for additional information
+ regarding copyright ownership.  The ASF licenses this file
+ to you under the Apache License, Version 2.0 (the
+ "License"); you may not use this file except in compliance
+ with the License.  You may obtain a copy of the License at
 
-         http://www.apache.org/licenses/LICENSE-2.0
+ http://www.apache.org/licenses/LICENSE-2.0
 
-       Unless required by applicable law or agreed to in writing,
-       software distributed under the License is distributed on an
-       "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
-       KIND, either express or implied.  See the License for the
-       specific language governing permissions and limitations
-       under the License.
-*/
+ Unless required by applicable law or agreed to in writing,
+ software distributed under the License is distributed on an
+ "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ KIND, either express or implied.  See the License for the
+ specific language governing permissions and limitations
+ under the License.
+ */
 package org.apache.cordova.camera;
 
 import java.io.ByteArrayOutputStream;
@@ -179,7 +179,7 @@ public class CameraLauncher extends CordovaPlugin implements MediaScannerConnect
         // SD Card Mounted
         if (Environment.getExternalStorageState().equals(Environment.MEDIA_MOUNTED)) {
             cache = new File(Environment.getExternalStorageDirectory().getAbsolutePath() +
-                    "/Android/data/" + cordova.getActivity().getPackageName() + "/cache/");
+                             "/Android/data/" + cordova.getActivity().getPackageName() + "/cache/");
         }
         // Use internal storage
         else {
@@ -230,8 +230,8 @@ public class CameraLauncher extends CordovaPlugin implements MediaScannerConnect
                 LOG.d(LOG_TAG, "Error: You don't have a default camera.  Your device may not be CTS complaint.");
             }
         }
-//        else
-//            LOG.d(LOG_TAG, "ERROR: You must use the CordovaInterface for this to work correctly. Please implement it in your activity");
+        //        else
+        //            LOG.d(LOG_TAG, "ERROR: You must use the CordovaInterface for this to work correctly. Please implement it in your activity");
     }
 
     /**
@@ -304,7 +304,7 @@ public class CameraLauncher extends CordovaPlugin implements MediaScannerConnect
         }
         if (this.cordova != null) {
             this.cordova.startActivityForResult((CordovaPlugin) this, Intent.createChooser(intent,
-                    new String(title)), (srcType + 1) * 16 + returnType + 1);
+                                                                                           new String(title)), (srcType + 1) * 16 + returnType + 1);
         }
     }
 
@@ -340,7 +340,7 @@ public class CameraLauncher extends CordovaPlugin implements MediaScannerConnect
 
             if (this.cordova != null) {
                 this.cordova.startActivityForResult((CordovaPlugin) this,
-                        cropIntent, CROP_CAMERA + destType);
+                                                    cropIntent, CROP_CAMERA + destType);
             }
         } catch (ActivityNotFoundException anfe) {
             Log.e(LOG_TAG, "Crop operation not supported on this device");
@@ -436,7 +436,7 @@ public class CameraLauncher extends CordovaPlugin implements MediaScannerConnect
 
             // If all this is true we shouldn't compress the image.
             if (this.targetHeight == -1 && this.targetWidth == -1 && this.mQuality == 100 &&
-                    !this.correctOrientation) {
+                !this.correctOrientation) {
                 writeUncompressedImage(uri);
 
                 this.callbackContext.success(uri.toString());
@@ -483,7 +483,7 @@ public class CameraLauncher extends CordovaPlugin implements MediaScannerConnect
         String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
         String imageFileName = "IMG_" + timeStamp + ".jpg";
         File storageDir = Environment.getExternalStoragePublicDirectory(
-                Environment.DIRECTORY_PICTURES);
+                                                                        Environment.DIRECTORY_PICTURES);
         String galleryPath = storageDir.getAbsolutePath() + "/" + imageFileName;
         return galleryPath;
     }
@@ -550,7 +550,7 @@ public class CameraLauncher extends CordovaPlugin implements MediaScannerConnect
             // This is a special case to just return the path as no scaling,
             // rotating, nor compressing needs to be done
             if (this.targetHeight == -1 && this.targetWidth == -1 &&
-                    (destType == FILE_URI || destType == NATIVE_URI) && !this.correctOrientation) {
+                (destType == FILE_URI || destType == NATIVE_URI) && !this.correctOrientation) {
                 this.callbackContext.success(uri.toString());
             } else {
                 String uriString = uri.toString();
@@ -597,7 +597,7 @@ public class CameraLauncher extends CordovaPlugin implements MediaScannerConnect
                 else if (destType == FILE_URI || destType == NATIVE_URI) {
                     // Did we modify the image?
                     if ( (this.targetHeight > 0 && this.targetWidth > 0) ||
-                            (this.correctOrientation && this.orientationCorrected) ) {
+                        (this.correctOrientation && this.orientationCorrected) ) {
                         try {
                             String modifiedPath = this.ouputModifiedBitmap(bitmap, uri);
                             // The modified image is cached by the app in order to get around this and not have to delete you
@@ -707,7 +707,7 @@ public class CameraLauncher extends CordovaPlugin implements MediaScannerConnect
         String[] cols = { MediaStore.Images.Media.ORIENTATION };
         try {
             Cursor cursor = cordova.getActivity().getContentResolver().query(uri,
-                    cols, null, null, null);
+                                                                             cols, null, null, null);
             if (cursor != null) {
                 cursor.moveToPosition(0);
                 rotate = cursor.getInt(0);
@@ -760,7 +760,7 @@ public class CameraLauncher extends CordovaPlugin implements MediaScannerConnect
      * @throws IOException
      */
     private void writeUncompressedImage(Uri uri) throws FileNotFoundException,
-            IOException {
+    IOException {
         FileInputStream fis = null;
         OutputStream os = null;
         try {
@@ -964,11 +964,11 @@ public class CameraLauncher extends CordovaPlugin implements MediaScannerConnect
      */
     private Cursor queryImgDB(Uri contentStore) {
         return this.cordova.getActivity().getContentResolver().query(
-                contentStore,
-                new String[] { MediaStore.Images.Media._ID },
-                null,
-                null,
-                null);
+                                                                     contentStore,
+                                                                     new String[] { MediaStore.Images.Media._ID },
+                                                                     null,
+                                                                     null,
+                                                                     null);
     }
 
     /**
