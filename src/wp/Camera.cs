@@ -1,10 +1,10 @@
-﻿/*  
+﻿/*
 	Licensed under the Apache License, Version 2.0 (the "License");
 	you may not use this file except in compliance with the License.
 	You may obtain a copy of the License at
-	
+
 	http://www.apache.org/licenses/LICENSE-2.0
-	
+
 	Unless required by applicable law or agreed to in writing, software
 	distributed under the License is distributed on an "AS IS" BASIS,
 	WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -201,7 +201,7 @@ namespace WPCordovaClassLib.Cordova.Commands
                 // a very large number will force the other value to be the bound
                 if (cameraOptions.TargetWidth > -1 && cameraOptions.TargetHeight == -1)
                 {
-                    cameraOptions.TargetHeight = 100000;   
+                    cameraOptions.TargetHeight = 100000;
                 }
                 else if (cameraOptions.TargetHeight > -1 && cameraOptions.TargetWidth == -1)
                 {
@@ -337,7 +337,7 @@ namespace WPCordovaClassLib.Cordova.Commands
                     break;
             }
         }
-     
+
         /// <summary>
         /// Returns image content in a form of base64 string
         /// </summary>
@@ -388,7 +388,17 @@ namespace WPCordovaClassLib.Cordova.Commands
                 width = Convert.ToInt32(ratio * objWB.PixelWidth);
                 height = Convert.ToInt32(ratio * objWB.PixelHeight);
             }
-            else
+							// Image is too big for my project :-) Causes memory exception
+						else if (objWB.PixelHeight > 1080 && objWB.PixelWidth > 1080)
+						{
+								// Keep proportionally
+								double ratio = Math.Min(
+										(double)1080 / objWB.PixelWidth,
+										(double)1080 / objWB.PixelHeight);
+								width = Convert.ToInt32(ratio * objWB.PixelWidth);
+								height = Convert.ToInt32(ratio * objWB.PixelHeight);
+						}
+						else
             {
                 width = objWB.PixelWidth;
                 height = objWB.PixelHeight;
@@ -411,12 +421,12 @@ namespace WPCordovaClassLib.Cordova.Commands
                     GC.Collect();
                 }
 
-                //Convert the resized stream to a byte array. 
+                //Convert the resized stream to a byte array.
                 int streamLength = (int)objBitmapStreamResized.Length;
-                resizedFile = new Byte[streamLength]; //-1 
+                resizedFile = new Byte[streamLength]; //-1
                 objBitmapStreamResized.Position = 0;
 
-                //for some reason we have to set Position to zero, but we don't have to earlier when we get the bytes from the chosen photo... 
+                //for some reason we have to set Position to zero, but we don't have to earlier when we get the bytes from the chosen photo...
                 objBitmapStreamResized.Read(resizedFile, 0, streamLength);
             }
 
