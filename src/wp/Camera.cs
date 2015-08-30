@@ -355,6 +355,7 @@ namespace WPCordovaClassLib.Cordova.Commands
             finally
             {
                 stream.Dispose();
+								GC.Collect();
             }
 
             return Convert.ToBase64String(imageContent);
@@ -428,6 +429,7 @@ namespace WPCordovaClassLib.Cordova.Commands
 
                 //for some reason we have to set Position to zero, but we don't have to earlier when we get the bytes from the chosen photo...
                 objBitmapStreamResized.Read(resizedFile, 0, streamLength);
+								objBitmapStreamResized.Dispose();
             }
 
             return resizedFile;
